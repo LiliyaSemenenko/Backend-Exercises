@@ -10,7 +10,7 @@ public class TreeSerializer_Q2 implements TreeSerializer{
 
         class Traverse {
 
-            // Constructor for Traverse class taking a Node as an argument
+            // Constructor for Traverse class
             Traverse(Node currentNode) {
 
                 if (seenNodes.contains(currentNode)) {
@@ -33,6 +33,7 @@ public class TreeSerializer_Q2 implements TreeSerializer{
                     resultString.append("#");
                     resultString.append(",");
                 }
+                // If the current node has a right child, recursively traverse the left subtree
                 if (currentNode.right != null) {
                     new Traverse(currentNode.right);
                 }
@@ -123,11 +124,6 @@ public class TreeSerializer_Q2 implements TreeSerializer{
         System.out.println(serializeToString);
 
         Node deserializeToNode = test.deserialize(serializeToString);
-        System.out.println(deserializeToNode.num);
-        System.out.println(deserializeToNode.left.num);
-        System.out.println(deserializeToNode.right.num);
-        System.out.println(deserializeToNode.right.right.num);
-
 
         String serializeBackToString = test.serialize(deserializeToNode);
         System.out.println(serializeBackToString);
