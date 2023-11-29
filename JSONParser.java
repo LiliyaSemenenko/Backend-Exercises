@@ -43,7 +43,6 @@ public class JSONParser {
         while (i < json.length()){
 
             char currentChar = json.charAt(i);
-
             // ------------------------------------------------------------------------------------------------------------------
             // Map Section
             // ------------------------------------------------------------------------------------------------------------------
@@ -78,7 +77,6 @@ public class JSONParser {
                 // ------------------------------------------------------------------------------------------------------------------
                 // String Section
                 // ------------------------------------------------------------------------------------------------------------------
-
                 // Start of a String
                 if (currentChar == '"' && string_mode == false) {
                     string_mode = true;
@@ -225,7 +223,6 @@ public class JSONParser {
                     // Numbers (int, double) Section
                     // ------------------------------------------------------------------------------------------------------------------
                     if (Character.isDigit(currentCharInList)){
-
                         char numType = 'i';
 
                         while (Character.isDigit(currentCharInList) || currentCharInList == '.'){
@@ -309,109 +306,19 @@ public class JSONParser {
         return resultList;
     }
 
-    private static void testJSONParser(String jsonString) {
-        try {
-            System.out.println("Input JSON: " + jsonString);
-            Map<String, Object> output = JSONParser.parseJson(jsonString);
-            System.out.println("");
-            System.out.println("Output Map: " + output);
-            System.out.println("==========================================");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void main(String[] args) {
         try {
-            testJSONParser("{\"debug\":\"on\",\"window\":{\"title\":\"sample\",\"size\":500}}");
-            testJSONParser("{\"name\":\"John\",\"age\":30,\"city\":\"New York\"}");
-            testJSONParser("{\"array\":[1,2,3,4,5]}");
-            testJSONParser("{\"nestedArray\":[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]}");
-            testJSONParser("{\"booleanValue\":true,\"stringValue\":\"Hello\",\"intValue\":42,\"doubleValue\":3.14}");
-            testJSONParser("{}"); // Empty object
-            testJSONParser("[]"); // Empty array
-            testJSONParser("null"); // Null value
-            testJSONParser("{\"key\":null}"); // Null value within an object
-            testJSONParser("{" +
-                "\"user\": {" +
-                    "\"name\": \"Alice\"," +
-                    "\"age\": 25," +
-                    "\"address\": {" +
-                        "\"city\": \"Wonderland\"," +
-                        "\"postalCode\": \"12345\"" +
-                    "}," +
-                    "\"hobbies\": [\"reading\", \"painting\"]" +
-                "}," +
-                "\"company\": {" +
-                    "\"name\": \"TechCo\"," +
-                    "\"employees\": [" +
-                        "{\"name\": \"Bob\", \"position\": \"Developer\"}," +
-                        "{\"name\": \"Charlie\", \"position\": \"Designer\"}" +
-                    "]" +
-                "}" +
-            "}"
-            );
-            testJSONParser("{" +
-                "\"details\": {" +
-                    "\"name\": \"John\"," +
-                    "\"age\": 30," +
-                    "\"height\": 6.1," +
-                    "\"isStudent\": false," +
-                    "\"grades\": [95, 88, 75]" +
-                "}," +
-                "\"metadata\": {" +
-                    "\"createdOn\": \"2023-01-01T12:30:00\"," +
-                    "\"isActive\": true" +
-                "}" +
-            "}");
-            testJSONParser("{" +
-                "\"person\": {" +
-                    "\"name\": \"Eve\"," +
-                    "\"details\": {" +
-                        "\"address\": {" +
-                            "\"city\": \"Metropolis\"," +
-                            "\"postalCode\": \"54321\"" +
-                        "}," +
-                        "\"contacts\": [" +
-                            "{\"type\": \"email\", \"value\": \"eve@example.com\"}," +
-                            "{\"type\": \"phone\", \"value\": \"+123456789\"}" +
-                        "]" +
-                    "}" +
-                "}," +
-                "\"events\": [" +
-                    "{" +
-                        "\"name\": \"Conference\"," +
-                        "\"date\": \"2023-02-15\"," +
-                        "\"participants\": [" +
-                            "{\"name\": \"Alice\", \"role\": \"Speaker\"}," +
-                            "{\"name\": \"Bob\", \"role\": \"Attendee\"}" +
-                        "]" +
-                    "}," +
-                    "{" +
-                        "\"name\": \"Workshop\"," +
-                        "\"date\": \"2023-03-01\"," +
-                        "\"participants\": [" +
-                            "{\"name\": \"Charlie\", \"role\": \"Instructor\"}," +
-                            "{\"name\": \"David\", \"role\": \"Participant\"}" +
-                        "]" +
-                    "}" +
-                "]" +
-                "}");
-            // String input = new String(Files.readAllBytes(Paths.get("data.json")));
-            // String input = "{\"debug\":\"on\",\"window\":{\"title\":\"sample\",\"size\":500}}";
-            // String input = "{\"debug\" : \"on\",\"window\" : {\"title\" : {\"sample\": {\"height\":2.019}}, \"size\": 500}, \"status\" : null}";
-            // String input = "{\"debug\" : \"on\",\"window\" : {\"title\" : {\"sample\": {\"height\":[null, \"kek\" , 4, true, \"lol\"]}}, \"size\": 500}, \"status\" : null}";
-            // String input = "{\"debug\" : \"on\", \"girls\" : 11.5, \"boys\" : 9.08, \"window\" : {\"title\" : {\"sample\": {\"height\":[null, \"kek\" , 4, true, {\"lol\" : \"mem\" , \"measure\" : 87, \"washed\" : false, \"list\": [1, null, 0.101, \"masha\", [], {}]}]}}, \"size\": 500}, \"status\" : null}";
-            // String input = "{\"debug\" : \"on\", \"girls\" : 11.5, \"boys\" : 9.08 ,  \"size\": 500}, \"status\" : null}";
-            String input = "{\"height\":{\"list\" : [1, null, 0.101, \"masha\", [], {}]}, \"size\": 500, \"status\" : null}";
+            // Input string from the exersice
+            String input = "{\"debug\":\"on\",\"window\":{\"title\":\"sample\",\"size\":500}}";
 
             Map<String, Object> output = JSONParser.parseJson(input);
             System.out.println(output);
 
-            // java -ea JSONParser.java
-            assert output.get("debug").equals("on") : "----------------- Assertion failed for debug -----------------";
-            assert ((Map<String, Object>) output.get("window")).get("title").equals("sample") : "----------------- Assertion failed for title -----------------";
-            assert ((Map<String, Object>) output.get("window")).get("size").equals(500) : "----------------- Assertion failed for size -----------------";
+            // Test block
+            // In the terminal: java -ea JSONParser.java
+            assert output.get("debug").equals("on");
+            assert ((Map<String, Object>) output.get("window")).get("title").equals("sample");
+            assert ((Map<String, Object>) output.get("window")).get("size").equals(500);
 
         } catch (Exception e) {
             e.printStackTrace();

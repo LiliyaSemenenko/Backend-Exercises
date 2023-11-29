@@ -107,12 +107,11 @@ public class TreeSerializer_Q1 implements TreeSerializer{
         root.left.right.right = null;
 
         TreeSerializer_Q1 test = new TreeSerializer_Q1();
+        // serialize from a node to a string
         String serializeToString = test.serialize(root);
 
+        // deserialize from a string to the node
         Node deserializeToNode = test.deserialize(serializeToString);
-
-        String serializeBackToString = test.serialize(deserializeToNode);
-        System.out.println(serializeBackToString);
 
         assert deserializeToNode.equals(root);
     }

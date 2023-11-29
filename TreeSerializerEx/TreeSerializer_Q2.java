@@ -39,7 +39,7 @@ public class TreeSerializer_Q2 implements TreeSerializer{
                 }
             }
         }
-        // Start the pre-order traversal by creating a new instance of Traverse with the root node
+        // Start the pre-order traversal by creating a new instance of Traverse
         new Traverse(root);
 
         // Return the results list containing the node values in the pre-order traversal order
@@ -78,7 +78,7 @@ public class TreeSerializer_Q2 implements TreeSerializer{
 
     public static void main(String[] args) {
 
-        // understand why works with searate files.
+        // Create a Binary Tree
         Node root = new Node();
         root.num = 1;
 
@@ -101,7 +101,6 @@ public class TreeSerializer_Q2 implements TreeSerializer{
         root.left.left = new Node();
         root.left.left.num = 7;
 
-        // no kid from 7
         root.left.left.right = null;
 
         root.left.left.left = new Node();
@@ -116,17 +115,15 @@ public class TreeSerializer_Q2 implements TreeSerializer{
         // no kid
         root.left.right.left = null;
         // cyclic part
-        // root.left.right.right = root.right;
-        root.left.right.right =  null;
+        root.left.right.right = root.right;
 
         TreeSerializer_Q2 test = new TreeSerializer_Q2();
+
+        // serialize a node to a string
         String serializeToString = test.serialize(root);
-        System.out.println(serializeToString);
 
+        // deserialize a string back to the node
         Node deserializeToNode = test.deserialize(serializeToString);
-
-        String serializeBackToString = test.serialize(deserializeToNode);
-        System.out.println(serializeBackToString);
 
         assert deserializeToNode.equals(root);
 
