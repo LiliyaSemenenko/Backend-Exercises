@@ -1,11 +1,24 @@
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
 public class JSONParser {
+
+    private static Object stringToObject(String str, char type) {
+        switch (type) {
+            case 'd':  // decimal
+                return Double.parseDouble(str);
+            case 'i':  // integer
+                return Integer.parseInt(str);
+            case 't':  // true
+                return true;
+            case 'f':  // false
+                return false;
+            default:
+                return null;  // or throw an exception if needed
+        }
+    }
 
     public static Map<String, Object> parseJson(String json) {
 
@@ -14,180 +27,383 @@ public class JSONParser {
         int i = 0;
         int num_curl_open = 0;
         int num_curl_closed = 0;
+        int num_brack_open = 0;
+        int num_brack_closed = 0;
 
-        // List<String> list_of_strings = new ArrayList<>();
-
-        boolean string_mode = false;
         boolean key_state = true;
-        boolean value_state = false;
+        boolean string_mode = false;
         boolean map_mode = false;
-        boolean array_mode =  false;
+        boolean list_mode = false;
 
         String str = "";
         String current_key = "";
-        String array_string = "";
         String map_string = "";
+        String list_str = "";
 
         while (i < json.length()){
 
-            // System.out.println(json.charAt(i));
-            // System.out.println(json.length());
-            // System.out.println(i);
-            // System.out.println(resultMap);
-
             char currentChar = json.charAt(i);
 
-            // Map section
-            if (currentChar == '{' && i != 0) {
-                map_mode = true;
-                num_curl_open += 1;
-                // System.out.println("here");
-            }
-            if (map_mode) {
-                map_string += currentChar;
-                // System.out.println("here1");
-            }
-            if (map_mode && currentChar == '}' && i != json.length()-1) {
-                num_curl_closed += 1;
-                if (num_curl_open != num_curl_closed){
-                    i++;
-                    continue;
-                } else {
-
-                    map_mode = false;
-                    // System.out.println("here2");
-
-                    Map<String, Object> map_output = JSONParser.parseJson(map_string);
-                    resultMap.put(current_key, map_output);
-                    key_state = true;
-                    value_state = false;
-                    i++;
-                    continue;
-                    }
-            }
-///////////////////////////////////////////////////////////////////////////////////////////////
-            // Array section
-            if (currentChar == '[') {
-                array_mode = true;
-                // num_brack_open += 1;
-            }
-            if (array_mode) {
-                array_string += currentChar;
-                // System.out.println("here1");
-            }
-            if (array_mode && currentChar == ']') {
-                array_mode = false;
-                // num_brack_closed += 1;
-                for (int j = 1; j < array_string.length(); j++){
-                    char array_char = array_string.charAt(j);
-                    System.out.println(array_char);
-                }
-                i++;
-                continue;
-            }
-///////////////////////////////////////////////////////////////////////////////////////////////
-            // start of a String
-            if (map_mode == false && currentChar == '"' && string_mode == false) {
-                // System.out.println("here3");
-                string_mode = true;
-                i++;
-                continue;
-            }
-            // end of a String
-            if (map_mode == false && currentChar == '"' && string_mode) {
-                string_mode = false;
-                // System.out.println("here4");
-                if (key_state){
-                    current_key = str;
-                    // switch states
-                    key_state = false;
-                    value_state = true;
-
-                    str = "";
-                    i++;
-                    continue;
-                }
-                if (value_state){
-                    resultMap.put(current_key, str);
-                    // switch states
-                    key_state = true;
-                    value_state = false;
-
-                    str = "";
-                    i++;
-                    continue;
-                }
-            }
-            // conctenate a String
-            if (map_mode == false && string_mode){
-                // System.out.println("here5");
-                str += currentChar;
-                i++;
-                continue;
-            }
-
+            // ------------------------------------------------------------------------------------------------------------------
             // Map Section
-            if (map_mode == false && string_mode == false && (currentChar == 't' || currentChar == 'f' || currentChar == 'n')){
-                // System.out.println("here6");
-                if (currentChar == 'n') {
-                    Object null_type = null;
-                    resultMap.put(current_key, null_type);
+            // ------------------------------------------------------------------------------------------------------------------
+            if (list_mode == false){
+                // Start a Map
+                if (currentChar == '{' && i != 0) {
+                    map_mode = true;
+                    num_curl_open += 1;
+                }
+                // Concatenate a Map string
+                if (map_mode) {
+                    map_string += currentChar;
+                }
+                // End a Map
+                if (map_mode && currentChar == '}' && i != json.length()-1) {
+                    num_curl_closed += 1;
+
+                    if (num_curl_open == num_curl_closed){
+                        map_mode = false;
+
+                        Map<String, Object> map_output = JSONParser.parseJson(map_string);
+
+                        resultMap.put(current_key, map_output);
+                        map_string = "";
+                        key_state = true;
+                        i++;
+                        continue;
+                        }
+                }
+            }
+            if (list_mode == false && map_mode == false){
+                // ------------------------------------------------------------------------------------------------------------------
+                // String Section
+                // ------------------------------------------------------------------------------------------------------------------
+
+                // Start of a String
+                if (currentChar == '"' && string_mode == false) {
+                    string_mode = true;
                     i++;
                     continue;
                 }
-                boolean bool = false;
-                if (currentChar == 't'){
-                    bool = true;
-                }
-                resultMap.put(current_key, bool);
-                i++;
-                continue;
-            }
-            if (map_mode == false && string_mode == false && Character.isDigit(currentChar)){
-                // System.out.println("here7");
-                boolean decimal = false;
+                // End of a String
+                if (list_mode == false && map_mode == false && currentChar == '"' && string_mode) {
 
-                while (Character.isDigit(currentChar) || currentChar == '.'){
-                    if (currentChar == '.'){
-                        decimal = true;
+                    string_mode = false;
+                    if (key_state){
+                        current_key = str;
+                        // switch states
+                        key_state = false;
+
+                        str = "";
+                        i++;
+                        continue;
                     }
+                    if (key_state == false){
+                        resultMap.put(current_key, str);
+                        // switch states
+                        key_state = true;
+
+                        str = "";
+                        i++;
+                        continue;
+                    }
+                }
+                // Conctenate a String
+                if (list_mode == false && map_mode == false && string_mode){
                     str += currentChar;
                     i++;
-                    currentChar = json.charAt(i);
+                    continue;
                 }
-                if (decimal){
-                    double num = Double.parseDouble(str);
-                    resultMap.put(current_key, num);
-                } else{
-                    int num = Integer.parseInt(str);
-                    resultMap.put(current_key, num);
+                // ------------------------------------------------------------------------------------------------------------------
+                // Boolean (T/F), Null Section
+                // ------------------------------------------------------------------------------------------------------------------
+                if (string_mode == false && (currentChar == 't' || currentChar == 'f' || currentChar == 'n')){
+                    Object boolOrNull = JSONParser.stringToObject("", currentChar);
+                    resultMap.put(current_key, boolOrNull);
+                    key_state = true;
+                    i++;
+                    continue;
                 }
-                str = "";
-                i++;
-                continue;
+                // ------------------------------------------------------------------------------------------------------------------
+                // Numbers (int, double) Section
+                // ------------------------------------------------------------------------------------------------------------------
+                if (string_mode == false && Character.isDigit(currentChar)){
+                    char numType = 'i';  // integer
+
+                    while (Character.isDigit(currentChar) || currentChar == '.'){
+                        if (currentChar == '.'){
+                            numType = 'd';  // double
+                        }
+                        str += currentChar;
+                        i++;
+                        currentChar = json.charAt(i);
+                    }
+                    Object num = JSONParser.stringToObject(str, numType);
+                    resultMap.put(current_key, num);
+                    key_state = true;
+                    str = "";
+                    i++;
+                    continue;
+                }
             }
-
-            // if (Character.isWhitespace(currentChar)) {
-            //     i++;
-            //     continue;
-            // }
-
+            // ------------------------------------------------------------------------------------------------------------------
+            // List Section
+            // ------------------------------------------------------------------------------------------------------------------
+            if (map_mode == false){
+                // Start a List
+                if (currentChar == '['){
+                        list_mode = true;
+                        num_brack_open += 1;
+                    }
+                // Concatenate a List string
+                if (list_mode){
+                    list_str += currentChar;
+                }
+                // End a List
+                if (list_mode && currentChar == ']') {
+                    num_brack_closed += 1;
+                    if (num_brack_open == num_brack_closed){
+                        list_mode = false;
+                        List<Object> list_output = JSONParser.convertStringToList(list_str);
+                        resultMap.put(current_key, list_output);
+                        list_str = "";
+                        key_state = true;
+                    }
+                }
+            }
             i++;
         }
-
-        // System.out.println();
-        // System.out.println(resultMap);
-        // System.out.println(array_string);
-
         return resultMap;
     }
 
+    private static List<Object> convertStringToList(String inputString) {
+
+        List<Object> resultList = new ArrayList<>();
+
+        int j = 0;
+        int numCurlOpen = 0;
+        int numCurlClosed = 0;
+        int numBrackOpen = 0;
+        int numBrackClosed = 0;
+
+        boolean stringMode = false;
+        boolean mapMode = false;
+        boolean listMode = false;
+
+        String elementString = "";
+        String mapString = "";
+        String listString = "";
+
+        while (j < inputString.length()){
+
+            char currentCharInList = inputString.charAt(j);
+
+            // ------------------------------------------------------------------------------------------------------------------
+            // String Section
+            // ------------------------------------------------------------------------------------------------------------------
+            if (listMode == false && mapMode == false){
+                // Start a String
+                if (currentCharInList == '"' && stringMode == false){
+                    stringMode = true;
+                    j++;
+                    continue;
+                }
+                // End a String
+                if (stringMode && currentCharInList == '"'){
+                    stringMode = false;
+                    resultList.add(elementString);
+                    elementString = "";
+                }
+                // Concatenate a String
+                if (stringMode){
+                    elementString += currentCharInList;
+                }
+            }
+            if (stringMode == false){
+                if (listMode == false && mapMode == false){
+                    // ------------------------------------------------------------------------------------------------------------------
+                    // Numbers (int, double) Section
+                    // ------------------------------------------------------------------------------------------------------------------
+                    if (Character.isDigit(currentCharInList)){
+
+                        char numType = 'i';
+
+                        while (Character.isDigit(currentCharInList) || currentCharInList == '.'){
+                            if (currentCharInList == '.'){
+                                numType = 'd';
+                            }
+                            elementString += currentCharInList;
+                            j++;
+                            currentCharInList = inputString.charAt(j);
+                        }
+                        Object num = JSONParser.stringToObject(elementString, numType);
+                        resultList.add(num);
+                        elementString = "";
+                        j++;
+                        continue;
+                    }
+                    // ------------------------------------------------------------------------------------------------------------------
+                    // Boolean (T/F), Null Section
+                    // ------------------------------------------------------------------------------------------------------------------
+                    if (currentCharInList == 't' || currentCharInList == 'f' || currentCharInList == 'n'){
+                        Object boolOrNull = JSONParser.stringToObject("", currentCharInList);
+                        resultList.add(boolOrNull);
+                    }
+                }
+            }
+            // ------------------------------------------------------------------------------------------------------------------
+            // List Section
+            // ------------------------------------------------------------------------------------------------------------------
+            if (mapMode == false){
+                // Start a List
+                if (listMode == false && currentCharInList == '[' && j != 0){
+                    listMode = true;
+                    numBrackOpen += 1;
+                }
+                // Concatenate a List string
+                if (listMode){
+                    listString += currentCharInList;
+                }
+                // End a List
+                if (listMode && currentCharInList == ']' && j != inputString.length()-1) {
+                    numBrackClosed += 1;
+                    if (numBrackOpen == numBrackClosed){
+                        listMode = false;
+                        List<Object> listOutput = JSONParser.convertStringToList(listString);
+                        resultList.add(listOutput);
+                        listString = "";
+                        j++;
+                        continue;
+                    }
+                }
+            }
+            // ------------------------------------------------------------------------------------------------------------------
+            // Map Section
+            // ------------------------------------------------------------------------------------------------------------------
+            if (listMode == false){
+                // Start a Map
+                if (mapMode == false && currentCharInList == '{') {
+                    mapMode = true;
+                    numCurlOpen += 1;
+                }
+                // Concatenate a Map string
+                if (mapMode) {
+                    mapString += currentCharInList;
+                }
+                // End a Map
+                if (mapMode && currentCharInList == '}') {
+
+                    numCurlClosed += 1;
+                    if (numCurlOpen == numCurlClosed){
+                        mapMode = false;
+
+                        Map<String, Object> mapOutput = JSONParser.parseJson(mapString);
+                        resultList.add(mapOutput);
+
+                        mapString = "";
+                    }
+                }
+            }
+            j++;
+        }
+        return resultList;
+    }
+
+    private static void testJSONParser(String jsonString) {
+        try {
+            System.out.println("Input JSON: " + jsonString);
+            Map<String, Object> output = JSONParser.parseJson(jsonString);
+            System.out.println("");
+            System.out.println("Output Map: " + output);
+            System.out.println("==========================================");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         try {
+            testJSONParser("{\"debug\":\"on\",\"window\":{\"title\":\"sample\",\"size\":500}}");
+            testJSONParser("{\"name\":\"John\",\"age\":30,\"city\":\"New York\"}");
+            testJSONParser("{\"array\":[1,2,3,4,5]}");
+            testJSONParser("{\"nestedArray\":[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]}");
+            testJSONParser("{\"booleanValue\":true,\"stringValue\":\"Hello\",\"intValue\":42,\"doubleValue\":3.14}");
+            testJSONParser("{}"); // Empty object
+            testJSONParser("[]"); // Empty array
+            testJSONParser("null"); // Null value
+            testJSONParser("{\"key\":null}"); // Null value within an object
+            testJSONParser("{" +
+                "\"user\": {" +
+                    "\"name\": \"Alice\"," +
+                    "\"age\": 25," +
+                    "\"address\": {" +
+                        "\"city\": \"Wonderland\"," +
+                        "\"postalCode\": \"12345\"" +
+                    "}," +
+                    "\"hobbies\": [\"reading\", \"painting\"]" +
+                "}," +
+                "\"company\": {" +
+                    "\"name\": \"TechCo\"," +
+                    "\"employees\": [" +
+                        "{\"name\": \"Bob\", \"position\": \"Developer\"}," +
+                        "{\"name\": \"Charlie\", \"position\": \"Designer\"}" +
+                    "]" +
+                "}" +
+            "}"
+            );
+            testJSONParser("{" +
+                "\"details\": {" +
+                    "\"name\": \"John\"," +
+                    "\"age\": 30," +
+                    "\"height\": 6.1," +
+                    "\"isStudent\": false," +
+                    "\"grades\": [95, 88, 75]" +
+                "}," +
+                "\"metadata\": {" +
+                    "\"createdOn\": \"2023-01-01T12:30:00\"," +
+                    "\"isActive\": true" +
+                "}" +
+            "}");
+            testJSONParser("{" +
+                "\"person\": {" +
+                    "\"name\": \"Eve\"," +
+                    "\"details\": {" +
+                        "\"address\": {" +
+                            "\"city\": \"Metropolis\"," +
+                            "\"postalCode\": \"54321\"" +
+                        "}," +
+                        "\"contacts\": [" +
+                            "{\"type\": \"email\", \"value\": \"eve@example.com\"}," +
+                            "{\"type\": \"phone\", \"value\": \"+123456789\"}" +
+                        "]" +
+                    "}" +
+                "}," +
+                "\"events\": [" +
+                    "{" +
+                        "\"name\": \"Conference\"," +
+                        "\"date\": \"2023-02-15\"," +
+                        "\"participants\": [" +
+                            "{\"name\": \"Alice\", \"role\": \"Speaker\"}," +
+                            "{\"name\": \"Bob\", \"role\": \"Attendee\"}" +
+                        "]" +
+                    "}," +
+                    "{" +
+                        "\"name\": \"Workshop\"," +
+                        "\"date\": \"2023-03-01\"," +
+                        "\"participants\": [" +
+                            "{\"name\": \"Charlie\", \"role\": \"Instructor\"}," +
+                            "{\"name\": \"David\", \"role\": \"Participant\"}" +
+                        "]" +
+                    "}" +
+                "]" +
+                "}");
             // String input = new String(Files.readAllBytes(Paths.get("data.json")));
-            String input = "{\"debug\":\"on\",\"window\":{\"title\":\"sample\",\"size\":500}}";
-            // String input = "{\"debug\" : \"on\",\"window\" : {\"title\" : {\"sample\": {\"height\":[2.019, 7]}}, \"size\": 500}, \"status\" : null}";
+            // String input = "{\"debug\":\"on\",\"window\":{\"title\":\"sample\",\"size\":500}}";
+            // String input = "{\"debug\" : \"on\",\"window\" : {\"title\" : {\"sample\": {\"height\":2.019}}, \"size\": 500}, \"status\" : null}";
+            // String input = "{\"debug\" : \"on\",\"window\" : {\"title\" : {\"sample\": {\"height\":[null, \"kek\" , 4, true, \"lol\"]}}, \"size\": 500}, \"status\" : null}";
+            // String input = "{\"debug\" : \"on\", \"girls\" : 11.5, \"boys\" : 9.08, \"window\" : {\"title\" : {\"sample\": {\"height\":[null, \"kek\" , 4, true, {\"lol\" : \"mem\" , \"measure\" : 87, \"washed\" : false, \"list\": [1, null, 0.101, \"masha\", [], {}]}]}}, \"size\": 500}, \"status\" : null}";
+            // String input = "{\"debug\" : \"on\", \"girls\" : 11.5, \"boys\" : 9.08 ,  \"size\": 500}, \"status\" : null}";
+            String input = "{\"height\":{\"list\" : [1, null, 0.101, \"masha\", [], {}]}, \"size\": 500, \"status\" : null}";
 
             Map<String, Object> output = JSONParser.parseJson(input);
             System.out.println(output);
