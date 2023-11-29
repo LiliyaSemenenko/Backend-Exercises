@@ -1,0 +1,18 @@
+Q3. Suggestions:
+
+• For each node, store a value of a generic T data type. This change will allow to for a node to hold any data type.
+
+  Example:
+
+    public class Node<T> {
+        Node<T> left;
+        Node<T> right;
+        T value;
+    }
+
+• If nodes in a Binary Tree are of different data types, store them inside a hash map instead of a list.
+  Follow this format: {Type: value}.
+
+  Example:
+
+    {"int": 3, "double": 4.5, "string": "hello"}
