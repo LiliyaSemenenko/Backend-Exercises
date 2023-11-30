@@ -1,6 +1,6 @@
 Q3. Suggestions:
 
-• For each node, store a value of a generic T data type. This change will allow to for a node to hold any data type.
+• For each node, store a value of a generic T data type. This change will allow for a node to hold any data type.
 
   Example:
 
@@ -10,9 +10,101 @@ Q3. Suggestions:
         T value;
     }
 
-• If nodes in a Binary Tree are of different data types, store them inside a hash map instead of a list.
-  Follow this format: {Type: value}.
+• Serialization: (Node -> String)
 
-  Example:
+1. Create a dictionary called a TypeToChar that would store a data type as a key and a corresponding character in a value string.
+    Note: characters (values) will be stored later in a string and used to quickly access a node's data type during deserialization.
 
-    {"int": 3, "double": 4.5, "string": "hello"}
+    An example of what TypeToChar could look like:
+
+        TypeToChar = {
+            null: "N",
+            class java.lang.Long: "L",
+            short: "s",
+            class java.lang.String: "T",
+            class java.lang.Float: "F",
+            class java.lang.Integer: "I",
+            class java.lang.Double: "D",
+            boolean: "b",
+            class java.lang.Character: "C",
+            int: "i",
+            class java.lang.Object: "O",
+            void: "V",
+            class java.lang.Enum: "E",
+            class java.lang.Byte: "Z",
+            char: "c",
+            float: "f",
+            class java.lang.Boolean: "B",
+            double: "d",
+            byte: "z",
+            long: "l",
+            class java.lang.Short: "S"
+        }
+
+2. Initialize variables
+
+    initialize a "character" to store each node's data type corresponding character
+    initialize a "counter" to keep track of the places in a string where each node's type will be stored acting as a divider between each node.
+    initialize a "counterSet" to store places in a string at which data type characters are located.
+    initialize a "resultString" to store all nodes' types and values in a single string.
+
+3. Inside a serialize(Node) function, iterate through every node in a tree.
+
+    - Use each node's type as a key to access its corresponding character value we defined in TypeToChar. Store that corresponding character in a "character" variable.
+
+    - Add a node's type (use "character") to a resultString.
+
+    - Make counter equal to the length of a resultString.
+    Add a counter to a counterSet.
+
+    - Add node's value to a resultString.
+
+    Format of a resultString variable (capitals are used for readibility but not in an actual resultString): "data type's corresponding characterVALUE"
+    A resultString could look like this: "i467THello!btrued70.125NnullCj"
+
+
+• Deserialization: (String -> Node)
+
+1. Create a dictionary called CharToType that would store a data type as a value and a corresponding character in a key string.
+    Note: data types (values) will be stored later in a node and used to quickly access a data type's corresponding character during serialization.
+
+    An example of what CharToType could look like:
+
+        CharToType = {
+            "b": boolean,
+            "B": class java.lang.Boolean,
+            "c": char,
+            "C": class java.lang.Character,
+            "d": double,
+            "D": class java.lang.Double,
+            "E": class java.lang.Enum,
+            "f": float,
+            "F": class java.lang.Float,
+            "i": int,
+            "I": class java.lang.Integer,
+            "l": long,
+            "L": class java.lang.Long,
+            "N": null,
+            "O": class java.lang.Object,
+            "s": short,
+            "S": class java.lang.Short,
+            "T": class java.lang.String,
+            "V": void,
+            "z": byte,
+            "Z": class java.lang.Byte
+        }
+
+2. Initialize variables
+
+    initialize a "type" to store each node's data type
+    initialize a "value" to store each node's value
+
+3. Inside a deserialize(resultString) function
+
+    - Iterate through every character in a resultString starting from the beginning until an iterator "i" appears to be inside a counterSet.
+      This would signal that we reached a data type character (represents a data type of the following node). Store a character inside "type" variable.
+
+    - Keep iterating through the resultString while storing the node's value inside a "value" variable until an iterator "i" appears to be inside a counterSet again.
+
+    - Finally, use a variable "type" as a key to access its value (data type) in a CharToType.
+    - Add a node to a tree using its known type and value.
