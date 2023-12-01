@@ -54,13 +54,13 @@ Q3. Suggestions:
 
     - Add a node's type (use "character") to a resultString.
 
-    - Make counter equal to the length of a resultString.
-    Add a counter to a counterSet.
+    - Make "counter" equal to the length of a resultString.
+    Add a counter to a "counterSet".
 
     - Add node's value to a resultString.
 
-    Format of a resultString variable (capitals are used for readibility but not in an actual resultString): "data type's corresponding characterVALUE"
-    A resultString could look like this: "i467THello!btrued70.125NnullCj"
+    Format of a "resultString" variable (capitals are used for readability but not in an actual "resultString"): "data type's corresponding characterVALUE"
+    A "resultString" could look like this: "i467THello!btrued70.125NnullCj"
 
 
 • Deserialization: (String -> Node)
@@ -102,7 +102,7 @@ Q3. Suggestions:
 3. Inside a deserialize(resultString) function
 
     - Iterate through every character in a resultString starting from the beginning until an iterator "i" appears to be inside a counterSet.
-      This would signal that we reached a data type character (represents a data type of the following node). Store a character inside "type" variable.
+      This would signal that we reached a data type character (represents a data type of the following node). Store a character inside the "type" variable.
 
     - Keep iterating through the resultString while storing the node's value inside a "value" variable until an iterator "i" appears to be inside a counterSet again.
 
